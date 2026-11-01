@@ -1,0 +1,1816 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBT Uji Kompetensi LSP - Bahasa Inggris Perawat (Embedded JSON)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header / Navbar -->
+    <header class="bg-blue-900 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white text-blue-900 p-2 rounded-lg font-bold text-xl">
+                    <i class="fa-solid fa-user-nurse"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">CBT LSP Bahasa Inggris Perawat</h1>
+                    <p class="text-xs text-blue-200">Embedded JSON Architecture (100% Independent Items)</p>
+                </div>
+            </div>
+            <div id="user-session-info" class="hidden md:flex items-center space-x-4 text-sm">
+                <div>
+                    <span id="display-peserta" class="font-semibold block">Peserta: -</span>
+                    <span id="display-nomor" class="text-xs text-blue-200">No. Reg: -</span>
+                </div>
+                <div class="bg-blue-800 px-3 py-1.5 rounded-lg border border-blue-700 flex items-center space-x-2">
+                    <i class="fa-solid fa-clock text-amber-300"></i>
+                    <span id="timer-display" class="font-mono font-bold text-amber-300">02:00:00</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6">
+
+        <!-- STEP 1: Form Registrasi Peserta -->
+        <section id="view-login" class="max-w-md mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8 mt-10">
+            <div class="text-center mb-6">
+                <div class="inline-block bg-blue-100 text-blue-800 p-3 rounded-full text-2xl mb-3">
+                    <i class="fa-solid fa-id-card"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900">Registrasi Ujian CBT</h2>
+                <p class="text-sm text-slate-500 mt-1">Masukkan data diri untuk memulai sesi ujian.</p>
+            </div>
+            <form id="form-login" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap & Gelar</label>
+                    <input type="text" id="input-nama" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Contoh: Ns. Cut Mutia, S.Kep.">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Nomor Registrasi / Ujian</label>
+                    <input type="text" id="input-reg" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none" placeholder="Contoh: LSP-ENG-2026-001">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition duration-200 shadow-md">
+                    Mulai Ujian <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </form>
+        </section>
+
+        <!-- STEP 2: Ruang Ujian CBT -->
+        <section id="view-cbt" class="hidden grid grid-cols-1 lg:grid-cols-4 gap-6">
+            
+            <!-- Area Soal Utama (3 Kolom) -->
+            <div class="lg:col-span-3 space-y-4">
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex justify-between items-center border-b pb-4 mb-4">
+                        <span id="question-category" class="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">Clinical Domain</span>
+                        <span class="text-sm text-slate-500 font-medium">Soal <span id="current-q-num">1</span> dari <span id="total-q-num">0</span></span>
+                    </div>
+
+                    <!-- Teks / Skenario Soal -->
+                    <div id="question-text" class="text-lg font-medium text-slate-900 mb-6 leading-relaxed">
+                        Memuat data soal...
+                    </div>
+
+                    <!-- Pilihan Ganda -->
+                    <div id="options-container" class="space-y-3">
+                        <!-- Opsi Jawaban -->
+                    </div>
+                </div>
+
+                <!-- Navigasi Bawah Soal -->
+                <div class="flex justify-between items-center bg-white rounded-xl shadow-md p-4">
+                    <button id="btn-prev" onclick="navigateQuestion(-1)" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg transition text-sm disabled:opacity-50">
+                        <i class="fa-solid fa-chevron-left mr-1"></i> Sebelumnya
+                    </button>
+                    <button id="btn-next" onclick="navigateQuestion(1)" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition text-sm">
+                        Selanjutnya <i class="fa-solid fa-chevron-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Panel Navigasi & Status Soal (1 Kolom) -->
+            <div class="space-y-4">
+                <div class="bg-white rounded-xl shadow-md p-5 sticky top-20">
+                    <h3 class="font-bold text-slate-800 mb-3 text-sm flex items-center justify-between">
+                        <span>Navigasi Soal</span>
+                        <span id="answered-counter" class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">0/0 Terjawab</span>
+                    </h3>
+                    
+                    <!-- Grid Nomor Soal (Scrollable) -->
+                    <div id="question-grid" class="grid grid-cols-6 gap-1.5 mb-4 max-h-64 overflow-y-auto p-1 border border-slate-200 rounded-lg">
+                        <!-- Tombol Nomor Soal Dinamis -->
+                    </div>
+
+                    <!-- Warning / Info Box -->
+                    <div class="bg-amber-50 border-l-4 border-amber-400 p-3 text-xs text-amber-800 mb-4 rounded-r-lg">
+                        <p class="font-semibold mb-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Validasi Wajib:</p>
+                        Tombol <b>Selesaikan Ujian</b> terkunci hingga seluruh soal terjawab penuh.
+                    </div>
+
+                    <!-- Tombol Submit -->
+                    <button id="btn-submit" onclick="confirmSubmit()" disabled class="w-full bg-slate-300 text-slate-500 font-bold py-3 rounded-xl transition duration-200 cursor-not-allowed shadow-inner flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>Selesaikan Ujian</span>
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- STEP 3: Hasil Ujian -->
+        <section id="view-result" class="hidden max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8 mt-6 text-center">
+            <div class="inline-block bg-emerald-100 text-emerald-600 p-4 rounded-full text-4xl mb-4">
+                <i class="fa-solid fa-award"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-slate-900 mb-2">Ujian Telah Diselesaikan</h2>
+            <p class="text-slate-600 mb-6">Berikut adalah rekapitulasi hasil asesmen Anda.</p>
+
+            <div class="bg-slate-50 rounded-xl p-6 border border-slate-200 mb-6 text-left space-y-3">
+                <div class="flex justify-between border-b pb-2">
+                    <span class="text-slate-500">Nama Peserta:</span>
+                    <span id="res-nama" class="font-semibold text-slate-800">-</span>
+                </div>
+                <div class="flex justify-between border-b pb-2">
+                    <span class="text-slate-500">Nomor Registrasi:</span>
+                    <span id="res-reg" class="font-semibold text-slate-800">-</span>
+                </div>
+                <div class="flex justify-between border-b pb-2">
+                    <span class="text-slate-500">Skor Benar:</span>
+                    <span id="res-score" class="font-semibold text-emerald-600">-</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Status Kelulusan (Passing Grade 75%):</span>
+                    <span id="res-status" class="font-bold">-</span>
+                </div>
+            </div>
+
+            <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-lg transition">
+                <i class="fa-solid fa-rotate-right mr-2"></i> Keluar / Ulangi Sesi
+            </button>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-xs text-slate-500">
+        &copy; 2026 CBT Standardized Nursing English Competency System. All rights reserved.
+    </footer>
+
+    <!-- JavaScript Logika & Database Soal JSON (Bagian 1: Soal 1-30) -->
+    <script>
+        // ======= DATABASE SOAL FORMAT JSON (BAGIAN 1: 1-30) =======
+        const questionBank = [
+            {
+                id: 1,
+                category: "Patient Assessment",
+                question: "A patient reports sharp pleuritic chest pain upon deep inspiration. Which nursing inquiry best explores this symptom?",
+                options: [
+                    "Can you point to exactly where the pain is and rate it from 0 to 10?",
+                    "Why did you wait until today to mention your chest discomfort?",
+                    "Does the pain radiate down your right arm when you lie flat?",
+                    "Have you experienced any recent hair loss or skin rashes?"
+                ],
+                answer: 0
+            },
+            {
+                id: 2,
+                category: "ISBAR Handover",
+                question: "During shift handover using ISBAR, which statement belongs under 'Assessment'?",
+                options: [
+                    "Patient was admitted yesterday following a motor vehicle collision.",
+                    "Current blood pressure is 90/60 mmHg with heart rate of 125 bpm.",
+                    "I recommend administering a 500 mL normal saline bolus immediately.",
+                    "Patient has a known allergy to penicillin and sulfa drugs."
+                ],
+                answer: 1
+            },
+            {
+                id: 3,
+                category: "Medication Safety",
+                question: "Before administering high-alert potassium chloride IV piggyback, the nurse performs the 'three checks and six rights'. The primary purpose is:",
+                options: [
+                    "Ensuring hospital billing records are accurately updated.",
+                    "Preventing medication administration errors and protecting patient safety.",
+                    "Complying with housekeeping sanitary regulations.",
+                    "Determining the patient's personal insurance coverage tier."
+                ],
+                answer: 1
+            },
+            {
+                id: 4,
+                category: "Emergency Response",
+                question: "A postoperative patient's oxygen saturation drops suddenly to 84% on room air. What is the most precise professional report to the Rapid Response Team?",
+                options: [
+                    "The patient in bed 12 looks sleepy and needs someone to look at them.",
+                    "Urgent: Bed 12 has acute oxygen desaturation to 84% requiring immediate physician evaluation.",
+                    "Can someone bring an extra blanket to bed 12 because it is cold?",
+                    "The wall oxygen flowmeter in bed 12 is broken and needs replacement."
+                ],
+                answer: 1
+            },
+            {
+                id: 5,
+                category: "Informed Consent",
+                question: "An alert elderly patient scheduled for cardiac catheterization expresses confusion regarding procedural risks. The nurse's appropriate action is:",
+                options: [
+                    "Reassure the patient and ask them to sign the consent form quickly.",
+                    "Explain all surgical risks in full detail independently.",
+                    "Withhold consent signing and notify the attending physician to re-explain.",
+                    "Tell the patient that risks are minimal and not worth worrying about."
+                ],
+                answer: 2
+            },
+            {
+                id: 6,
+                category: "Clinical Communication",
+                question: "A nurse is instructing a patient with type 2 diabetes on self-monitoring blood glucose. Which phrase demonstrates clear patient-centered instructions?",
+                options: [
+                    "You must perform glycometabolic self-assessment regimens precisely four times daily without exception.",
+                    "Let's review how and when to check your blood sugar using your meter before meals.",
+                    "Failure to adhere to glycemic testing protocols will result in severe metabolic decompensation.",
+                    "Ask your family member to handle all glucose logging to avoid technical confusion."
+                ],
+                answer: 1
+            },
+            {
+                id: 7,
+                category: "Pharmacology",
+                question: "A physician prescribes sublingual nitroglycerin for a patient experiencing angina pectoris. What is the essential nursing instruction regarding its administration?",
+                options: [
+                    "Swallow the tablet immediately with a full glass of warm water.",
+                    "Place the tablet under your tongue and let it dissolve completely without chewing or swallowing.",
+                    "Crush the tablet and mix it into applesauce for easier swallowing.",
+                    "Take the medication only after eating a heavy meal to prevent stomach upset."
+                ],
+                answer: 1
+            },
+            {
+                id: 8,
+                category: "Emergency Triage",
+                question: "In an overcrowded emergency department, a patient presents with severe shortness of breath, cyanosis, and use of accessory muscles. The triage nurse classifies this as:",
+                options: [
+                    "Non-urgent routine ambulatory care requiring scheduled outpatient follow-up.",
+                    "Semi-urgent stable condition with a maximum waiting time of two hours.",
+                    "Emergent / Resuscitation priority requiring immediate clinical intervention.",
+                    "Minor musculoskeletal sprain suitable for self-care advice."
+                ],
+                answer: 2
+            },
+            {
+                id: 9,
+                category: "Documentation",
+                question: "When documenting objective wound care findings in the electronic health record, the nurse should write:",
+                options: [
+                    "Wound looks infected and smells terrible today.",
+                    "Patient complained that the surgical incision site is annoying.",
+                    "Stage II pressure ulcer on left heel, measuring 3cm x 2cm with moderate serosanguineous drainage and no foul odor.",
+                    "Dressing changed as requested, patient slept well all night long."
+                ],
+                answer: 2
+            },
+            {
+                id: 10,
+                category: "Infection Control",
+                question: "A patient diagnosed with active pulmonary tuberculosis is admitted to the medical ward. Which transmission-based precautions must the nurse implement?",
+                options: [
+                    "Standard precautions only with regular surgical masks for visitors.",
+                    "Contact precautions including sterile gowns and dedicated stethoscopes.",
+                    "Airborne precautions with negative pressure isolation room and N95 respirators.",
+                    "Droplet precautions within three feet of the patient's bedside."
+                ],
+                answer: 2
+            },
+            {
+                id: 11,
+                category: "Geriatric Care",
+                question: "An 82-year-old hospitalized patient is prone to nocturnal falls. What is the most proactive nursing intervention?",
+                options: [
+                    "Apply physical limb restraints tightly to the bed rails throughout the night.",
+                    "Keep the bed in the lowest position, call bell within reach, and ensure adequate night lighting.",
+                    "Administer routine sedative hypnotics to keep the patient sleeping continuously.",
+                    "Instruct the patient never to get out of bed under any circumstances without calling security."
+                ],
+                answer: 1
+            },
+            {
+                id: 12,
+                category: "Pediatric Nursing",
+                question: "When assessing pain in a 4-year-old pediatric patient, which validated assessment tool is most appropriate?",
+                options: [
+                    "Numeric Rating Scale (NRS from 0 to 10)",
+                    "Wong-Baker FACES Pain Rating Scale",
+                    "Glasgow Coma Scale (GCS)",
+                    "Adult Nonverbal Pain Scale (NVPS)"
+                ],
+                answer: 1
+            },
+            {
+                id: 13,
+                category: "Surgical Nursing",
+                question: "During the preoperative check in the holding area, the nurse notices the surgical site marking is missing on a patient scheduled for bilateral knee arthroscopy. The correct nursing action is:",
+                options: [
+                    "Proceed to the operating room since the medical chart specifies the knee.",
+                    "Apply the surgical marker personally based on nursing judgment.",
+                    "Stop the preoperative verification process and immediately notify the surgeon to mark the site.",
+                    "Ask the patient which knee hurts more and mark that side."
+                ],
+                answer: 2
+            },
+            {
+                id: 14,
+                category: "Clinical Communication",
+                question: "A patient expresses fear and anxiety prior to undergoing general anesthesia. The supportive nursing response is:",
+                options: [
+                    "There is nothing to be afraid of; thousands of people undergo this daily.",
+                    "It is completely normal to feel anxious before surgery. Would you like me to explain what to expect in the holding suite?",
+                    "Try not to worry because worrying only increases your blood pressure.",
+                    "The anesthesiologist will handle everything, so you don't need to think about it."
+                ],
+                answer: 1
+            },
+            {
+                id: 15,
+                category: "Pharmacology",
+                question: "A patient receiving intravenous heparin therapy has an activated partial thromboplastin time (aPTT) significantly above the therapeutic range. The nurse anticipates an order to:",
+                options: [
+                    "Increase the heparin infusion rate by 2 mL/hour.",
+                    "Stop or decrease the heparin infusion and notify the physician.",
+                    "Administer an extra dose of oral aspirin immediately.",
+                    "Discontinue all blood work monitoring for the next 48 hours."
+                ],
+                answer: 1
+            },
+            {
+                id: 16,
+                category: "Emergency Triage",
+                question: "A patient arrives at the clinic with sudden left-sided facial drooping, slurred speech, and acute right arm weakness starting 45 minutes ago. The nurse recognizes these as classic signs of:",
+                options: [
+                    "Acute myocardial infarction requiring immediate thrombolytics.",
+                    "Acute cerebrovascular accident (Stroke) requiring emergency stroke protocol activation.",
+                    "Severe migraine headache with temporary aura.",
+                    "Peripheral neuropathy secondary to Vitamin B deficiency."
+                ],
+                answer: 1
+            },
+            {
+                id: 17,
+                category: "Documentation",
+                question: "Which entry represents a legally sound, objective nursing progress note?",
+                options: [
+                    "Patient was uncooperative and rude during morning hygiene care.",
+                    "Patient appeared depressed and refused to speak with anyone.",
+                    "Administered Morphine 4 mg IV push for reported incisional pain rated 8/10. Reassessment in 30 minutes shows pain rating decreased to 3/10.",
+                    "Patient slept poorly because the roommate snored loudly all night."
+                ],
+                answer: 2
+            },
+            {
+                id: 18,
+                category: "Infection Control",
+                question: "Proper hand hygiene technique using alcohol-based hand rub requires rubbing hands together until:",
+                options: [
+                    "Hands feel completely dry and all moisture has evaporated.",
+                    "A visible soapy lather appears on the fingertips.",
+                    "Hands are rinsed thoroughly under warm running tap water.",
+                    "A paper towel is used to dry the remaining residue."
+                ],
+                answer: 0
+            },
+            {
+                id: 19,
+                category: "Geriatric Care",
+                question: "A confused elderly patient attempts repeatedly to pull out their nasogastric feeding tube. What is the nurse's priority clinical intervention?",
+                options: [
+                    "Immediately secure bilateral wrist restraints without a physician's order.",
+                    "Assess the underlying cause of agitation (e.g., discomfort, confusion), use distraction, and notify the provider if needed.",
+                    "Administer high-dose intravenous sedatives to immobilize the patient completely.",
+                    "Ignore the behavior since nasogastric tubes are designed to withstand pulling."
+                ],
+                answer: 1
+            },
+            {
+                id: 20,
+                category: "Pediatric Nursing",
+                question: "When calculating pediatric medication dosages based on body weight, the nurse must ensure calculations use:",
+                options: [
+                    "Pounds (lbs) exclusively without conversion.",
+                    "Kilograms (kg) as the standardized metric unit.",
+                    "Ounces (oz) for accurate precision.",
+                    "Patient's age in months rather than weight."
+                ],
+                answer: 1
+            },
+            {
+                id: 21,
+                category: "Clinical Communication",
+                question: "A patient with newly diagnosed hypertension asks what 'systolic blood pressure' means. The nurse explains:",
+                options: [
+                    "It is the pressure in your arteries when your heart relaxes between beats.",
+                    "It is the peak pressure in your arteries when your heart contracts to pump blood.",
+                    "It is your average daily heart rate multiplied by your body weight.",
+                    "It is the resistance offered by your peripheral blood vessels."
+                ],
+                answer: 1
+            },
+            {
+                id: 22,
+                category: "ISBAR Handover",
+                question: "In the ISBAR communication tool, what information is communicated in the 'Recommendation' section?",
+                options: [
+                    "Patient's vital signs and laboratory results from this morning.",
+                    "Specific suggestions on what actions should be taken next for patient care.",
+                    "Past medical history and surgical background.",
+                    "Chief complaint that brought the patient to the hospital."
+                ],
+                answer: 1
+            },
+            {
+                id: 23,
+                category: "Medication Safety",
+                question: "What should the nurse do if an error is made while documenting in a paper nursing record?",
+                options: [
+                    "Use correction fluid (liquid paper) to completely cover the error.",
+                    "Draw a single straight line through the incorrect entry, write 'error', and initial/date it.",
+                    "Tear out the page and rewrite the entire nursing note cleanly.",
+                    "Scribble heavily over the mistake until it is completely unreadable."
+                ],
+                answer: 1
+            },
+            {
+                id: 24,
+                category: "Emergency Response",
+                question: "During routine morning rounds, a patient is found unresponsive with no pulse and no breathing. The nurse's immediate initial action is:",
+                options: [
+                    "Leave the room to find the attending physician.",
+                    "Call for help / activate the emergency code response team and start CPR.",
+                    "Check the patient's medical insurance card.",
+                    "Wait at the bedside for family members to arrive."
+                ],
+                answer: 1
+            },
+            {
+                id: 25,
+                category: "Informed Consent",
+                question: "Who holds the primary legal responsibility for obtaining informed consent for a surgical procedure from a patient?",
+                options: [
+                    "The registered nurse assigned to the patient.",
+                    "The operating room circulating nurse.",
+                    "The performing surgeon or physician.",
+                    "The hospital administrative admissions officer."
+                ],
+                answer: 2
+            },
+            {
+                id: 26,
+                category: "Clinical Communication",
+                question: "A patient who speaks limited English is admitted for observation. To ensure effective communication during assessment, the nurse should:",
+                options: [
+                    "Use hand gestures and speak very loudly in English.",
+                    "Request a qualified professional medical interpreter.",
+                    "Ask another patient in the hallway to translate.",
+                    "Guess the patient's symptoms based on nonverbal cues alone."
+                ],
+                answer: 1
+            },
+            {
+                id: 27,
+                category: "Pharmacology",
+                question: "A patient is prescribed warfarin (Coumadin). Which laboratory test is essential for monitoring the therapeutic effectiveness of this medication?",
+                options: [
+                    "Complete Blood Count (CBC)",
+                    "International Normalized Ratio (INR)",
+                    "Serum Creatinine and BUN",
+                    "Liver Function Test (LFT)"
+                ],
+                answer: 1
+            },
+            {
+                id: 28,
+                category: "Emergency Triage",
+                question: "A patient presents with a deep laceration to the forearm actively bleeding. The nurse's immediate first aid action is:",
+                options: [
+                    "Apply direct pressure to the wound using a clean sterile dressing.",
+                    "Elevate the patient's legs above heart level.",
+                    "Administer oral pain medication immediately.",
+                    "Wash the wound with boiling water."
+                ],
+                answer: 0
+            },
+            {
+                id: 29,
+                category: "Documentation",
+                question: "Why is timely documentation in the patient's clinical record critical?",
+                options: [
+                    "It ensures hospital management can track staff break times.",
+                    "It provides an accurate, real-time record of patient status and nursing care for interprofessional continuity.",
+                    "It is only required for legal billing purposes at discharge.",
+                    "It replaces verbal handovers entirely."
+                ],
+                answer: 1
+            },
+            {
+                id: 30,
+                category: "Infection Control",
+                question: "What is the primary purpose of wearing clean non-sterile gloves during direct patient care?",
+                options: [
+                    "To eliminate the need for hand hygiene before and after care.",
+                    "To protect the nurse from contact with blood, body fluids, and non-intact skin.",
+                    "To keep the nurse's hands warm in air-conditioned rooms.",
+                    "To prevent all airborne microbial transmission."
+                ],
+                answer: 1
+     },
+  {
+    "id": 31,
+    "category": "Maternity Nursing",
+    "question": "A postpartum client 2 hours post-delivery saturates two perineal pads within 15 minutes with a boggy uterus. The nurse's immediate action is to:",
+    "options": [
+      "Massage the uterine fundus gently until firm and monitor lochia.",
+      "Immediately insert an indwelling urinary catheter.",
+      "Encourage the client to ambulate in the hallway.",
+      "Administer routine oral pain medication."
+    ],
+    "answer": 0
+  },
+  {
+    "id": 32,
+    "category": "Mental Health Nursing",
+    "question": "A psychiatric client experiencing paranoid delusions refuses to eat hospital meals, stating the food is poisoned. The nurse's therapeutic response is:",
+    "options": [
+      "Tell the client that nobody would try to poison them here.",
+      "Taste the food in front of the client to prove it is safe.",
+      "Offer unopened canned or packaged food items and listen to the client's concerns.",
+      "Force-feed the client to ensure adequate caloric intake."
+    ],
+    "answer": 2
+  },
+  {
+    "id": 33,
+    "category": "IV Therapy Safety",
+    "question": "While inspecting a peripheral intravenous site, the nurse notes coolness, swelling, and dampness around the dressing. The nurse recognizes this as:",
+    "options": [
+      "Normal phlebitis requiring warm compresses only.",
+      "Intravenous infiltration requiring immediate cessation and site removal.",
+      "Arterial spasm caused by rapid infusion rates.",
+      "Normal healing tissue following fluid absorption."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 34,
+    "category": "Pharmacology",
+    "question": "When mixing regular insulin and NPH insulin in a single syringe, which principle must the nurse follow to prevent contaminating the regular insulin vial?",
+    "options": [
+      "Draw up NPH insulin first, then regular insulin.",
+      "Inject air into NPH first, air into regular, then draw up regular (clear) before NPH (cloudy).",
+      "Mix both insulins vigorously by shaking the syringe.",
+      "Always use two separate syringes regardless of patient preference."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 35,
+    "category": "Community Health",
+    "question": "During a home safety assessment for an elderly client with unsteady gait, the community health nurse should recommend:",
+    "options": [
+      "Placing polished wax rugs on hardwood hallways for aesthetics.",
+      "Removing scatter rugs, improving lighting, and installing grab bars in the bathroom.",
+      "Keeping all interior doors locked at night for security.",
+      "Using low-backed chairs without armrests in the living room."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 36,
+    "category": "Critical Care",
+    "question": "When monitoring central venous pressure (CVP) via a central line, an abnormally low CVP reading typically indicates:",
+    "options": [
+      "Hypovolemia or reduced venous return.",
+      "Fluid overload or right ventricular failure.",
+      "Cardiac tamponade or pericardial effusion.",
+      "Severe hypertension."
+    ],
+    "answer": 0
+  },
+  {
+    "id": 37,
+    "category": "Oncology Nursing",
+    "question": "During peripheral infusion of a vesicant chemotherapy agent, the client reports burning pain at the needle site. The nurse's immediate priority is to:",
+    "options": [
+      "Slow down the infusion rate by half.",
+      "Stop the infusion immediately, leave the catheter in place, and notify the physician/oncology team.",
+      "Flush the line rapidly with normal saline to clear the drug.",
+      "Apply localized heat packs to the site."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 38,
+    "category": "Pediatric Immunization",
+    "question": "An infant receives routine childhood immunizations. What post-vaccination education should the nurse provide to the parents?",
+    "options": [
+      "Mild fever and local soreness at the injection site are common; apply a cool, damp cloth.",
+      "Restrict all fluid intake for 24 hours following vaccination.",
+      "Administer high-dose adult aspirin for minor fussiness.",
+      "Keep the infant isolated in a dark room for two days."
+    ],
+    "answer": 0
+  },
+  {
+    "id": 39,
+    "category": "Perioperative Care",
+    "question": "Eight hours post-abdominal surgery, a client has not voided and reports lower abdominal discomfort with dull percussion tones over the symphysis pubis. The nurse suspects:",
+    "options": [
+      "Normal postoperative diuresis.",
+      "Acute urinary retention requiring bladder scan and possible catheterization.",
+      "Dehydration from inadequate intravenous fluids.",
+      "Bowel obstruction."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 40,
+    "category": "Emergency Nursing",
+    "question": "In mass casualty triage using START (Simple Triage and Rapid Treatment), a victim who is breathing spontaneously at 34 breaths/min, has delayed capillary refill (>2 seconds), and cannot follow simple commands is tagged as:",
+    "options": [
+      "Green (Minor)",
+      "Yellow (Delayed)",
+      "Red (Immediate)",
+      "Black (Expectant / Deceased)"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 41,
+    "category": "Cardiovascular Nursing",
+    "question": "An ECG rhythm strip shows irregularly irregular QRS complexes with no discernible P waves. The nurse identifies this rhythm as:",
+    "options": [
+      "Sinus bradycardia",
+      "Atrial fibrillation",
+      "Ventricular tachycardia",
+      "First-degree heart block"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 42,
+    "category": "Respiratory Nursing",
+    "question": "While assessing a client with a chest tube connected to a water-seal system, the nurse observes continuous bubbling in the water-seal chamber. This finding indicates:",
+    "options": [
+      "Normal lung re-expansion progress.",
+      "An air leak somewhere in the chest drainage system or insertion site.",
+      "Obstruction of the chest drainage tubing.",
+      "Low suction pressure from the wall regulator."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 43,
+    "category": "Neurological Nursing",
+    "question": "When assessing level of consciousness using the Glasgow Coma Scale (GCS), a client who opens eyes to speech, uses inappropriate words, and localizes to pain receives a total score of:",
+    "options": [
+      "E3 V3 M5 = Total 11",
+      "E4 V5 M6 = Total 15",
+      "E2 V2 M2 = Total 6",
+      "E1 V1 M1 = Total 3"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 44,
+    "category": "Gastrointestinal Nursing",
+    "question": "When evaluating a newly constructed colostomy on the second postoperative day, the nurse expects the stoma appearance to be:",
+    "options": [
+      "Pale pink and dry",
+      "Dark purple or black",
+      "Pink to red, moist, and slightly raised",
+      "White and coated with exudate"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 45,
+    "category": "Renal Nursing",
+    "question": "Before initiating hemodialysis through a newly created arteriovenous (AV) fistula, the nurse should assess for patency by:",
+    "options": [
+      "Measuring blood pressure on the access arm every 15 minutes.",
+      "Palpating for a thrill and auscultating for a bruit over the fistula.",
+      "Flushing the fistula with heparinized saline daily.",
+      "Applying tight circumferential dressings over the site."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 46,
+    "category": "Musculoskeletal Nursing",
+    "question": "A client is in Buck's traction for a fractured femur. What is an essential nursing intervention to maintain traction effectiveness?",
+    "options": [
+      "Ensure the traction weights hang freely and do not touch the floor or bed frame.",
+      "Remove the weights every 2 hours to allow leg relaxation.",
+      "Elevate the foot of the bed above the level of the weights.",
+      "Apply lotion directly under the foam traction boots."
+    ],
+    "answer": 0
+  },
+  {
+    "id": 47,
+    "category": "Endocrine Nursing",
+    "question": "A client with diabetic ketoacidosis (DKA) is admitted to the emergency unit. What is the priority initial nursing intervention?",
+    "options": [
+      "Administering subcutaneous long-acting insulin.",
+      "Initiating aggressive intravenous fluid resuscitation with normal saline.",
+      "Feeding the client high-carbohydrate oral supplements.",
+      "Encouraging immediate strenuous physical exercise."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 48,
+    "category": "Hematology Nursing",
+    "question": "Within 15 minutes of initiating a packed red blood cell transfusion, a client develops chills, lower back pain, and dyspnea. The nurse's immediate action is to:",
+    "options": [
+      "Slow the transfusion rate and continue monitoring.",
+      "Stop the transfusion immediately, disconnect the tubing, and infuse normal saline through a new set.",
+      "Administer oral antihistamines and wait 30 minutes.",
+      "Notify the blood bank after finishing the unit."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 49,
+    "category": "Burn Care",
+    "question": "According to the Parkland formula for burn resuscitation, fluid replacement calculations are based on the time elapsed from:",
+    "options": [
+      "The time the client arrived at the emergency department.",
+      "The time the burn injury actually occurred.",
+      "The time the first surgical debridement was completed.",
+      "The time intravenous access was successfully established."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 50,
+    "category": "Infection Control",
+    "question": "When removing personal protective equipment (PPE) after caring for an isolation client, what is the correct sequence of removal?",
+    "options": [
+      "Gloves, goggles/face shield, gown, mask/respirator.",
+      "Mask, gown, gloves, goggles.",
+      "Gown, gloves, mask, goggles.",
+      "Respirator, gloves, gown, face shield."
+    ],
+    "answer": 0
+  },
+  {
+    "id": 51,
+    "category": "Nursing Ethics",
+    "question": "An adult client of sound mind refuses a life-saving blood transfusion due to personal religious beliefs. The nurse's ethical obligation is to:",
+    "options": [
+      "Respect client autonomy and advocate for alternative non-blood medical therapies.",
+      "Administer the blood transfusion secretly while the client sleeps.",
+      "Obtain a court order to force compliance immediately.",
+      "Discharge the client from the facility immediately."
+    ],
+    "answer": 0
+  },
+  {
+    "id": 52,
+    "category": "Legal Aspects",
+    "question": "To establish nursing malpractice in a court of law, the plaintiff must prove four elements: duty, breach of duty, causation, and:",
+    "options": [
+      "Intentional malice on the nurse's part.",
+      "Actual injury or damages suffered by the client.",
+      "Written reprimand from the hospital board.",
+      "Public media coverage of the incident."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 53,
+    "category": "Nursing Leadership",
+    "question": "Which task can a registered nurse appropriately delegate to unlicensed assistive personnel (UAP)?",
+    "options": [
+      "Performing initial admission assessment on a complex postoperative client.",
+      "Obtaining routine vital signs on a stable client admitted yesterday.",
+      "Evaluating the effectiveness of a newly prescribed antihypertensive medication.",
+      "Teaching self-injection techniques to a newly diagnosed diabetic client."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 54,
+    "category": "Evidence-Based Practice",
+    "question": "In evidence-based practice, what does the 'P' in the PICO clinical question framework stand for?",
+    "options": [
+      "Protocol",
+      "Population / Patient / Problem",
+      "Procedure",
+      "Pharmacology"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 55,
+    "category": "Nursing Informatics",
+    "question": "When communicating client health information electronically or via mobile messaging, the nurse must ensure compliance with privacy regulations to protect:",
+    "options": [
+      "Hospital billing revenue margins.",
+      "Protected Health Information (PHI) and client confidentiality.",
+      "Insurance company reimbursement rates.",
+      "Staff scheduling preferences."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 56,
+    "category": "Pain Management",
+    "question": "A client is receiving opioid analgesia via Patient-Controlled Analgesia (PCA) pump. What is a crucial nursing safety measure?",
+    "options": [
+      "Allow family members to press the PCA button whenever the client appears asleep.",
+      "Only the client should press the PCA button to deliver medication.",
+      "Lock the PCA lockout interval to zero for maximum pain relief.",
+      "Discontinue all respiratory rate monitoring."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 57,
+    "category": "Palliative Care",
+    "question": "In end-of-life palliative care, nursing interventions focus primarily on:",
+    "options": [
+      "Aggressive curative treatments and experimental chemotherapy trials.",
+      "Symptom management, comfort measures, and emotional/spiritual support.",
+      "Restricting family visits to specific visiting hours.",
+      "Enforcing strict diagnostic testing schedules."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 58,
+    "category": "Disaster Nursing",
+    "question": "During a hospital disaster drill, a victim with minor abrasions and lacerations who is able to walk independently is categorized as:",
+    "options": [
+      "Immediate (Red)",
+      "Delayed (Yellow)",
+      "Minor / Walking Wounded (Green)",
+      "Expectant (Black)"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 59,
+    "category": "Environmental Health",
+    "question": "A family is brought to the emergency department experiencing headache, dizziness, nausea, and cherry-red skin coloration after indoor heater use. The nurse suspects:",
+    "options": [
+      "Carbon monoxide poisoning",
+      "Food poisoning from seafood",
+      "Acute appendicitis",
+      "Common cold virus"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 60,
+    "category": "Professional Development",
+    "question": "Participation in continuing professional education and nursing licensure renewal ensures that nurses maintain:",
+    "options": [
+      "Minimum competency and up-to-date evidence-based clinical standards.",
+      "Exemption from hospital shift rotations.",
+      "Permanent immunity from clinical errors.",
+      "Automatic promotion to nursing management."
+    ],
+    "answer": 0
+ },
+  {
+    "id": 61,
+    "category": "Cardiac Care",
+    "question": "A client with acute myocardial infarction is prescribed sublingual aspirin. What is the primary pharmacological action of aspirin in this acute scenario?",
+    "options": [
+      "To reduce systemic blood pressure rapidly",
+      "To prevent platelet aggregation and inhibit clot formation",
+      "To dissolve existing coronary thrombi completely",
+      "To provide severe pain relief and sedation"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 62,
+    "category": "Pulmonary Care",
+    "question": "A client with a tracheostomy tube has thick dried secretions causing airway resistance and mild dyspnea. The nurse's appropriate initial action is to:",
+    "options": [
+      "Immediately remove the tracheostomy tube and call a code.",
+      "Instill normal saline and perform sterile suctioning according to protocol.",
+      "Administer oral cough suppressants.",
+      "Decrease the humidified oxygen flow rate."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 63,
+    "category": "Neurological Care",
+    "question": "When caring for a client with increased intracranial pressure (ICP), which nursing positioning measure helps promote venous drainage from the brain?",
+    "options": [
+      "Keeping the head of the bed flat at 0 degrees with neck flexed.",
+      "Elevating the head of the bed to 30-45 degrees with the head in neutral alignment.",
+      "Placing the client in the Trendelenburg position.",
+      "Turning the client prone with a soft pillow under the face."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 64,
+    "category": "Gastrointestinal Care",
+    "question": "A client is prescribed a low-residue diet following acute diverticulitis flare-up. Which food item should the nurse instruct the client to avoid?",
+    "options": [
+      "White bread and skinned mashed potatoes",
+      "Raw vegetables, whole grains, and seeds",
+      "Clear broth and gelatin",
+      "Plain boiled white rice"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 65,
+    "category": "Endocrine Care",
+    "question": "A client with Graves' disease (hyperthyroidism) exhibits exophthalmos and nervousness. What environmental modification is most appropriate for this client?",
+    "options": [
+      "Maintaining a brightly lit, warm room environment.",
+      "Providing a quiet, cool, and dimly lit room to reduce sympathetic stimulation.",
+      "Encouraging high-intensity aerobic exercise groups.",
+      "Keeping all windows closed with heavy heating blankets."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 66,
+    "category": "Renal Care",
+    "question": "A client undergoing peritoneal dialysis reports that the dialysate outflow is sluggish and cloudy. The nurse's priority action is to:",
+    "options": [
+      "Ignore the finding as normal peritoneal drainage.",
+      "Assess for catheter kinks, check for constipation, and notify the physician while saving the effluent for lab analysis.",
+      "Inject warm sterile water into the peritoneal cavity rapidly.",
+      "Discontinue dialysis permanently without reporting."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 67,
+    "category": "Musculoskeletal Care",
+    "question": "After a total hip arthroplasty (posterior approach), which client movement or positioning must the nurse strictly prevent?",
+    "options": [
+      "Hip flexion greater than 90 degrees and crossing the legs (adduction).",
+      "Abducting the legs with a wedge pillow.",
+      "Keeping the surgical leg in neutral alignment.",
+      "Using an elevated toilet seat."
+    ],
+    "answer": 0
+  },
+  {
+    "id": 68,
+    "category": "Integumentary Care",
+    "question": "When assessing a client at high risk for pressure injuries, the nurse uses the Braden Scale. Which subscales are evaluated in this assessment tool?",
+    "options": [
+      "Age, gender, weight, and height",
+      "Sensory perception, moisture, activity, mobility, nutrition, and friction/shear",
+      "Blood pressure, pulse, temperature, and respiration",
+      "Pain score, anxiety level, and sleep quality"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 69,
+    "category": "Pediatric Nursing",
+    "question": "An infant is diagnosed with acute dehydration secondary to gastroenteritis. Which clinical sign indicates moderate to severe dehydration in an infant?",
+    "options": [
+      "Soft flat anterior fontanel and moist mucous membranes",
+      "Sunken anterior fontanel, dry mucous membranes, and lack of tears when crying",
+      "Warm flushed skin and high activity level",
+      "Bounding peripheral pulses and rapid weight gain"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 70,
+    "category": "Maternity Nursing",
+    "question": "A pregnant client at 32 weeks gestation presents with painless bright red vaginal bleeding. The nurse suspects:",
+    "options": [
+      "Abruptio placentae",
+      "Placenta previa",
+      "Normal bloody show",
+      "Ectopic tubal pregnancy"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 71,
+    "category": "Mental Health Nursing",
+    "question": "A client experiencing acute panic anxiety states: 'I feel like I am going to die right now.' The nurse's best initial response is:",
+    "options": [
+      "Leave the client alone in the room to calm down privately.",
+      "Stay with the client, speak in a calm reassuring voice, and keep environmental stimuli low.",
+      "Tell the client not to be ridiculous about dying.",
+      "Ask the client to write down their life history immediately."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 72,
+    "category": "Pharmacology",
+    "question": "A client receiving vancomycin IV infusion develops flushing of the face, neck, and upper torso ('Red Man Syndrome'). This reaction is typically associated with:",
+    "options": [
+      "An allergic anaphylactic shock requiring permanent discontinuation.",
+      "Too rapid infusion rate of the medication.",
+      "Normal therapeutic side effect with no clinical significance.",
+      "Inadequate hydration prior to infusion."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 73,
+    "category": "Infection Control",
+    "question": "Which microorganism requires the implementation of strict contact precautions in a hospital setting?",
+    "options": [
+      "Mycobacterium tuberculosis",
+      "Methicillin-resistant Staphylococcus aureus (MRSA)",
+      "Varicella-zoster virus (Chickenpox)",
+      "Influenza virus"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 74,
+    "category": "Emergency Nursing",
+    "question": "A client with suspected spinal cord injury from a diving accident is brought to the emergency department. The nurse must maintain spinal immobilization by using:",
+    "options": [
+      "Flexible foam pillows and passive range of motion exercises.",
+      "A rigid cervical collar and spine board with manual in-line stabilization.",
+      "Sitting the client upright in a wheelchair immediately.",
+      "Allowing the client to walk with assistance to the exam table."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 75,
+    "category": "Geriatric Care",
+    "question": "When communicating with an elderly client who has moderate sensorineural hearing loss, the nurse should:",
+    "options": [
+      "Shout loudly directly into the client's ear from across the room.",
+      "Face the client directly, speak in a normal or slightly lower pitch clearly, and minimize background noise.",
+      "Use written notes exclusively without speaking.",
+      "Speak extremely fast to finish the assessment quickly."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 76,
+    "category": "Surgical Nursing",
+    "question": "During the immediate postoperative recovery period, a client exhibits sudden restlessness, tachycardia, tachypnea, and cool clammy skin. The nurse should suspect:",
+    "options": [
+      "Normal physiological recovery from anesthesia",
+      "Postoperative hemorrhage or hypovolemic shock",
+      "Improved oxygenation and perfusion",
+      "Excessive room temperature"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 77,
+    "category": "Clinical Communication",
+    "question": "A client is hesitant to undergo a prescribed diagnostic procedure. The nurse uses open-ended communication by asking:",
+    "options": [
+      "Don't you trust your doctor's recommendations?",
+      "Can you share what specific concerns you have about this procedure?",
+      "Why are you refusing to cooperate with hospital staff?",
+      "Is your family forcing you to decline this test?"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 78,
+    "category": "Documentation",
+    "question": "Which charting practice violates legal and professional documentation standards in clinical nursing?",
+    "options": [
+      "Documenting care immediately after completion with date and time.",
+      "Charting nursing care before it is actually performed in anticipation.",
+      "Using approved professional medical abbreviations.",
+      "Recording objective client responses accurately."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 79,
+    "category": "Ethical Legal",
+    "question": "A nurse administers an incorrect medication dose due to fatigue, but the client suffers no adverse effects. The nurse must:",
+    "options": [
+      "Hide the mistake to avoid administrative reprimand since the client is fine.",
+      "Complete an incident report and notify the attending physician and nursing supervisor truthfully.",
+      "Blame the pharmacy technician for labeling errors.",
+      "Document that the correct medication was given."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 80,
+    "category": "Leadership Management",
+    "question": "When prioritizing client care during a shift assignment, the nurse should first attend to:",
+    "options": [
+      "A stable client requesting routine discharge instructions.",
+      "A client complaining of acute chest pain and shortness of breath.",
+      "A client needing routine morning hygiene assistance.",
+      "A client scheduled for elective physical therapy."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 81,
+    "category": "Cardiovascular Care",
+    "question": "A client is prescribed furosemide (Lasix) daily. Which laboratory electrolyte value must the nurse monitor closely?",
+    "options": [
+      "Serum potassium levels",
+      "Serum glucose levels",
+      "Red blood cell count",
+      "Platelet count"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 82,
+    "category": "Respiratory Care",
+    "question": "A client with acute respiratory distress is placed on a non-rebreather mask at 15 L/min. To ensure mask effectiveness, the nurse must verify that:",
+    "options": [
+      "The reservoir bag collapses completely during inhalation.",
+      "The reservoir bag remains inflated during inspiration and does not deflate entirely.",
+      "The exhalation ports are sealed shut with tape.",
+      "Oxygen flow is turned off periodically."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 83,
+    "category": "Neurological Care",
+    "question": "A client presents with signs of bacterial meningitis. Which diagnostic test is definitive for confirming this condition?",
+    "options": [
+      "Chest X-ray",
+      "Lumbar puncture (CSF analysis)",
+      "Electroencephalogram (EEG)",
+      "Complete blood count with differential"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 84,
+    "category": "Gastrointestinal Care",
+    "question": "A client with cirrhosis develops severe ascites and abdominal discomfort. The nurse anticipates assisting with which therapeutic procedure?",
+    "options": [
+      "Thoracentesis",
+      "Paracentesis",
+      "Bronchoscopy",
+      "Colonoscopy"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 85,
+    "category": "Endocrine Care",
+    "question": "A client with Addison's disease (adrenocortical insufficiency) is at risk for acute adrenal crisis during periods of stress. Nursing management includes administering:",
+    "options": [
+      "Supplemental intravenous corticosteroid therapy as ordered.",
+      "High-dose oral diuretics.",
+      "Insulin infusion protocols.",
+      "Fluid restriction measures."
+    ],
+    "answer": 0
+  },
+  {
+    "id": 86,
+    "category": "Renal Care",
+    "question": "A client with chronic kidney disease has a serum calcium level of 7.5 mg/dL (Hypocalcemia). The nurse should monitor for clinical signs such as:",
+    "options": [
+      "Muscle tetany, numbness/tingling, and positive Chvostek's sign.",
+      "Extreme lethargy and sluggish reflexes.",
+      "Hypertension and bounding pulses.",
+      "Polyuria and intense thirst."
+    ],
+    "answer": 0
+  },
+  {
+    "id": 87,
+    "category": "Musculoskeletal Care",
+    "question": "When assisting a client with left-sided hemiparesis to walk using a cane, the nurse instructs the client to hold the cane on:",
+    "options": [
+      "The left (weak) side exclusively",
+      "The right (strong) side, moving the cane forward simultaneously with the left weak leg",
+      "Both hands overhead while walking",
+      "Behind the back for posture support"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 88,
+    "category": "Oncology Nursing",
+    "question": "A client receiving radiation therapy to the neck area reports severe skin dryness, redness, and irritation. What skin care instruction should the nurse provide?",
+    "options": [
+      "Scrub the irradiated skin vigorously with a washcloth and perfumed soap.",
+      "Apply commercial alcohol-based lotions and heating pads.",
+      "Keep the skin clean and dry, use mild soap, and avoid applying harsh chemicals or extreme temperatures.",
+      "Expose the treatment area to direct afternoon sunlight daily."
+    ],
+    "answer": 2
+  },
+  {
+    "id": 89,
+    "category": "Pediatric Nursing",
+    "question": "A toddler is diagnosed with acute laryngotracheobronchitis (Croup). The nurse expects to observe which classic clinical manifestation?",
+    "options": [
+      "High fever and drooling with cherry-red epiglottis",
+      "Barking cough, inspiratory stridor, and hoarseness",
+      "Productive blood-tinged sputum",
+      "Severe abdominal cramps and diarrhea"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 90,
+    "category": "Maternity Nursing",
+    "question": "During the transition phase of the first stage of labor (8 to 10 cm dilation), the laboring client becomes irritable and reports nausea. The nurse recognizes this as:",
+    "options": [
+      "Abnormal psychological distress requiring immediate cesarean delivery",
+      "Normal physiological behavioral and physical responses during transition phase",
+      "An indication of epidural anesthesia failure",
+      "Signs of impending postpartum hemorrhage"
+    ],
+    "answer": 1
+{
+    "id": 91,
+    "category": "Mental Health Nursing",
+    "question": "A client diagnosed with major depressive disorder states: 'Life is just not worth living anymore, and everyone would be better off without me.' The nurse's immediate priority is to:",
+    "options": [
+      "Change the topic to something more positive and uplifting.",
+      "Conduct a direct suicide risk assessment and implement suicide precautions.",
+      "Leave the client alone to contemplate in silence.",
+      "Tell the client that things will get better tomorrow."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 92,
+    "category": "Pharmacology",
+    "question": "A client is prescribed digoxin 0.25 mg orally daily. Before administering the medication, the nurse's essential action is to:",
+    "options": [
+      "Check the client's blood pressure in both arms.",
+      "Measure the apical pulse for a full minute.",
+      "Review the client's recent white blood cell count.",
+      "Check the client's visual acuity."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 93,
+    "category": "Infection Control",
+    "question": "Which disinfection or sterilization method is required for surgical instruments that enter normally sterile tissue or the vascular system?",
+    "options": [
+      "Low-level disinfection with quaternary ammonium compounds",
+      "Intermediate-level disinfection with alcohol wipes",
+      "High-level disinfection or complete sterilization",
+      "Simple rinsing under warm tap water"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 94,
+    "category": "Emergency Nursing",
+    "question": "A client presents to the emergency department after sustaining chemical burns to both eyes from a corrosive industrial solvent. What is the nurse's immediate first action?",
+    "options": [
+      "Apply dry sterile gauze patches to both eyes immediately.",
+      "Irrigate both eyes continuously with copious amounts of sterile normal saline or water.",
+      "Administer oral pain relievers before any eye contact.",
+      "Cover the eyes with medicated antibiotic ointment."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 95,
+    "category": "Geriatric Care",
+    "question": "When assessing an elderly client for cognitive impairment, the nurse utilizes the Mini-Mental State Examination (MMSE). Which domain is evaluated?",
+    "options": [
+      "Cardiovascular endurance and stamina",
+      "Orientation, registration, attention/calculation, recall, and language",
+      "Muscle strength and joint flexibility",
+      "Pulmonary vital capacity"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 96,
+    "category": "Surgical Nursing",
+    "question": "A client postoperative following a thyroidectomy suddenly develops laryngeal stridor, dyspnea, and severe neck swelling. The nurse's priority action is to:",
+    "options": [
+      "Administer oral cough medicine.",
+      "Notify the surgeon immediately and ensure emergency tracheostomy tray is at the bedside.",
+      "Place the client flat on their back with neck hyperextended.",
+      "Wait for routine morning lab results."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 97,
+    "category": "Clinical Communication",
+    "question": "During discharge counseling, a client appears distracted and nods without asking questions. To confirm client understanding, the nurse should use:",
+    "options": [
+      "Do you understand everything I just explained to you?",
+      "Can you explain back to me in your own words how you will take your medications at home?",
+      "Please sign this discharge form confirming you understood.",
+      "There is no need to worry about home care instructions."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 98,
+    "category": "Documentation",
+    "question": "If a nurse makes an error while writing a nursing note in a paper chart, what is the correct procedure to rectify the mistake?",
+    "options": [
+      "White-out the mistake completely so it is invisible.",
+      "Draw a single line through the error, write 'error' above it with initials and date.",
+      "Tear out the entire page and rewrite the note neatly.",
+      "Leave the error uncorrected since minor mistakes do not matter."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 99,
+    "category": "Ethical Legal",
+    "question": "A competent adult client decides to leave the hospital against medical advice (AMA) before treatment is complete. The nurse's appropriate action is to:",
+    "options": [
+      "Lock the hospital room doors to prevent departure.",
+      "Explain the risks of leaving prematurely, have the client sign an AMA form, and document the event thoroughly.",
+      "Threaten the client with police intervention.",
+      "Refuse to return the client's personal clothing."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 100,
+    "category": "Leadership Management",
+    "question": "When delegating nursing activities to nursing assistants (UAP), the registered nurse must remember the Five Rights of Delegation: Right Task, Right Circumstance, Right Person, Right Direction/Communication, and:",
+    "options": [
+      "Right Salary Grade",
+      "Right Supervision / Evaluation",
+      "Right Uniform Color",
+      "Right Hospital Department"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 101,
+    "category": "Cardiovascular Care",
+    "question": "A client is scheduled for a cardiac catheterization via the femoral approach. What is the essential post-procedure nursing intervention?",
+    "options": [
+      "Keep the affected leg immobilized and extended flat with sandbags as ordered, monitoring peripheral pulses.",
+      "Encourage the client to get out of bed and walk immediately.",
+      "Apply a hot heating pad directly over the femoral insertion site.",
+      "Flex the client's hip joint repeatedly every 15 minutes."
+    ],
+    "answer": 0
+  },
+  {
+    "id": 102,
+    "category": "Respiratory Care",
+    "question": "A client with a chest tube has their drainage system accidentally disconnected from the tubing. What is the nurse's immediate emergency action?",
+    "options": [
+      "Leave the tubing open to room air and run for help.",
+      "Immerse the end of the chest tube sterilely in sterile water or saline to establish a temporary water seal.",
+      "Clamp the chest tube permanently with metal clamps.",
+      "Pull the chest tube completely out of the chest wall."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 103,
+    "category": "Neurological Care",
+    "question": "A client experiencing tonic-clonic seizures requires which immediate nursing safety measure during the seizure episode?",
+    "options": [
+      "Force a padded tongue depressor between the client's teeth.",
+      "Protect the client's head from injury, turn them to the side if possible, and maintain a clear airway without restraining limbs.",
+      "Restrain all four extremities tightly to the bed rails.",
+      "Attempt to hold the client upright in a chair."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 104,
+    "category": "Gastrointestinal Care",
+    "question": "A client post-total gastrectomy requires long-term administration of which vitamin to prevent pernicious anemia?",
+    "options": [
+      "Vitamin A",
+      "Vitamin C",
+      "Vitamin B12 (Cobalamin)",
+      "Vitamin D"
+    ],
+    "answer": 2
+  },
+  {
+    "id": 105,
+    "category": "Endocrine Care",
+    "question": "A client with diabetes mellitus is found confused, tremulous, and diaphoretic with a blood glucose reading of 45 mg/dL. The nurse's immediate action is to:",
+    "options": [
+      "Administer regular insulin subcutaneously.",
+      "Provide 15-20 grams of fast-acting oral carbohydrates (e.g., fruit juice or glucose tablets).",
+      "Wait 30 minutes and recheck the blood sugar without intervention.",
+      "Instruct the client to sleep until morning."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 106,
+    "category": "Renal Care",
+    "question": "A client with chronic kidney disease asks why dietary phosphorus is restricted. The nurse explains that elevated phosphorus binds with calcium, leading to:",
+    "options": [
+      "Stronger bone density and rapid muscle growth",
+      "Bone demineralization and renal osteodystrophy",
+      "Increased visual acuity",
+      "Lowered blood pressure"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 107,
+    "category": "Musculoskeletal Care",
+    "question": "When caring for a client in skeletal traction with pins inserted into the tibia, what is a crucial nursing responsibility regarding pin site care?",
+    "options": [
+      "Remove the crusts and scabs vigorously with alcohol pads daily.",
+      "Assess pin sites regularly for signs of infection (redness, drainage, pain) and perform sterile pin care per protocol.",
+      "Apply tight adhesive bandages over the metal pins.",
+      "Ignore pin site hygiene since bone heals automatically."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 108,
+    "category": "Oncology Nursing",
+    "question": "A client receiving myelosuppressive chemotherapy has an absolute neutrophil count (ANC) below 500/mm3. Which protective isolation precaution is essential?",
+    "options": [
+      "Allow fresh flowers and potted plants in the client's room.",
+      "Implement neutropenic precautions (strict hand hygiene, private room, no fresh fruits/vegetables, restrict sick visitors).",
+      "Encourage the client to walk freely in crowded hospital corridors.",
+      "Use standard precautions only without visitor restrictions."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 109,
+    "category": "Pediatric Nursing",
+    "question": "An infant is admitted with acute bronchiolitis caused by Respiratory Syncytial Virus (RSV). Which isolation precaution must the nurse establish?",
+    "options": [
+      "Airborne precautions in a negative pressure room",
+      "Contact and droplet precautions",
+      "Reverse isolation without masks",
+      "No special precautions required"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 110,
+    "category": "Maternity Nursing",
+    "question": "A postpartum client 3 days after delivery reports painful breast engorgement. What non-pharmacological comfort measure should the nurse recommend for a client who is formula feeding?",
+    "options": [
+      "Apply warm moist compresses and express milk frequently.",
+      "Apply ice packs, wear a supportive well-fitted bra, and avoid breast stimulation.",
+      "Massage the breasts vigorously with hot oil.",
+      "Allow the newborn to nurse every hour."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 111,
+    "category": "Mental Health Nursing",
+    "question": "A client with obsessive-compulsive disorder (OCD) spends hours washing hands. What is the most therapeutic nursing approach during the initial care phase?",
+    "options": [
+      "Prevent the client from washing hands entirely to break the habit quickly.",
+      "Allow time for the ritual while gradually setting limits and structuring alternative activities.",
+      "Scold the client for wasting time and water.",
+      "Ignore the behavior completely."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 112,
+    "category": "Pharmacology",
+    "question": "A client is prescribed intravenous vancomycin. Which laboratory value should the nurse monitor to prevent nephrotoxicity and ototoxicity?",
+    "options": [
+      "Serum peak and trough drug levels alongside serum creatinine",
+      "Serum sodium levels exclusively",
+      "Complete blood count differential",
+      "Total serum cholesterol"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 113,
+    "category": "Infection Control",
+    "question": "When performing sterile technique while setting up a sterile field, the nurse contaminates the field if:",
+    "options": [
+      "Sterile items are dropped squarely in the center of the sterile field.",
+      "Reaching across the sterile field or turning one's back on it.",
+      "Keeping hands above waist level at all times.",
+      "Opening sterile packages away from the body."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 114,
+    "category": "Emergency Nursing",
+    "question": "A client presents with acute anaphylactic shock after consuming peanuts. Which medication is the primary, life-saving initial treatment?",
+    "options": [
+      "Intravenous diphenhydramine (Benadryl)",
+      "Intramuscular or subcutaneous Epinephrine 1:1000",
+      "Oral aspirin",
+      "Sublingual nitroglycerin"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 115,
+    "category": "Geriatric Care",
+    "question": "An elderly hospitalized client shows sudden acute confusion, disorientation, and fluctuating attention span over 24 hours. The nurse suspects:",
+    "options": [
+      "Chronic Alzheimer's dementia",
+      "Acute delirium (often secondary to infection, hypoxia, or medication side effects)",
+      "Normal aging process",
+      "Bipolar affective disorder"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 116,
+    "category": "Surgical Nursing",
+    "question": "A postoperative client on the third day exhibits calf swelling, localized tenderness, and warmth in the left lower extremity. The nurse suspects:",
+    "options": [
+      "Normal muscle fatigue from physical therapy",
+      "Deep Vein Thrombosis (DVT) requiring immediate provider notification",
+      "Superficial skin dryness",
+      "Bone fracture"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 117,
+    "category": "Clinical Communication",
+    "question": "When communicating bad news or a complex diagnosis to a client and their family, the nurse should:",
+    "options": [
+      "Deliver all information rapidly in technical medical jargon.",
+      "Use clear, compassionate language, check for understanding, and provide emotional support.",
+      "Leave the room immediately after speaking.",
+      "Ask another visitor to explain the diagnosis."
+    ],
+    "answer": 1
+  },
+  {
+    "id": 118,
+    "category": "Documentation",
+    "question": "What is the primary legal purpose of maintaining accurate, objective medical records?",
+    "options": [
+      "To serve as a legal document reflecting care provided in judicial or regulatory reviews",
+      "To provide entertaining reading material for hospital visitors",
+      "To track staff cafeteria breaks",
+      "To replace verbal communication entirely"
+    ],
+    "answer": 0
+  },
+  {
+    "id": 119,
+    "category": "Ethical Legal",
+    "question": "A nurse advocates for a client's right to make their own healthcare decisions even when family members disagree. This ethical principle is known as:",
+    "options": [
+      "Beneficence",
+      "Autonomy",
+      "Paternalism",
+      "Veracity"
+    ],
+    "answer": 1
+  },
+  {
+    "id": 120,
+    "category": "Leadership Management",
+    "question": "When evaluating the effectiveness of a quality improvement initiative on reducing hospital-acquired infections, the nurse leader primarily analyzes:",
+    "options": [
+      "Staff parking space availability",
+      "Infection incidence rates and compliance audit data over time",
+      "Cafeteria menu pricing",
+      "Hospital building exterior paint colors"
+    ],
+    "answer": 1
+  }
+        ];
+        // -------------------------------------------------------------
+        // END OF JSON BAGIAN 1 (SOAL 1-30). KETIK "continue" UNTUK LANJUTAN SOAL 31-60.
+        // -------------------------------------------------------------
+
+        let currentState = {
+            nama: "",
+            nomorReg: "",
+            currentIndex: 0,
+            userAnswers: new Array(questionBank.length).fill(null),
+            timeLeft: 120 * 60
+        };
+
+        let timerInterval;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById('total-q-num').innerText = questionBank.length;
+        });
+
+        document.getElementById('form-login').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nama = document.getElementById('input-nama').value.trim();
+            const reg = document.getElementById('input-reg').value.trim();
+
+            if (!nama || !reg) return;
+
+            currentState.nama = nama;
+            currentState.nomorReg = reg;
+
+            document.getElementById('display-peserta').innerText = `Peserta: ${nama}`;
+            document.getElementById('display-nomor').innerText = `No. Reg: ${reg}`;
+
+            document.getElementById('view-login').classList.add('hidden');
+            document.getElementById('view-cbt').classList.remove('hidden');
+
+            initQuestionGrid();
+            renderQuestion();
+            startTimer();
+        });
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (currentState.timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Waktu ujian telah habis!");
+                    submitExam();
+                    return;
+                }
+                currentState.timeLeft--;
+                const hours = Math.floor(currentState.timeLeft / 3600);
+                const minutes = Math.floor((currentState.timeLeft % 3600) / 60);
+                const seconds = currentState.timeLeft % 60;
+                
+                document.getElementById('timer-display').innerText = 
+                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function initQuestionGrid() {
+            const grid = document.getElementById('question-grid');
+            grid.innerHTML = '';
+            questionBank.forEach((q, idx) => {
+                const btn = document.createElement('button');
+                btn.id = `grid-btn-${idx}`;
+                btn.innerText = idx + 1;
+                btn.className = "h-8 w-full rounded font-semibold text-xs border transition flex items-center justify-center bg-white border-slate-300 text-slate-700 hover:bg-slate-100";
+                btn.onclick = () => goToQuestion(idx);
+                grid.appendChild(btn);
+            });
+        }
+
+        function renderQuestion() {
+            const idx = currentState.currentIndex;
+            const q = questionBank[idx];
+
+            document.getElementById('current-q-num').innerText = idx + 1;
+            document.getElementById('question-category').innerText = q.category;
+            document.getElementById('question-text').innerText = q.question;
+
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            q.options.forEach((opt, oIdx) => {
+                const isSelected = currentState.userAnswers[idx] === oIdx;
+                const optDiv = document.createElement('label');
+                optDiv.className = `flex items-start p-3.5 rounded-xl border cursor-pointer transition ${
+                    isSelected ? 'bg-blue-50 border-blue-600 text-blue-900 shadow-sm' : 'border-slate-200 hover:bg-slate-50 text-slate-700'
+                }`;
+                
+                optDiv.innerHTML = `
+                    <input type="radio" name="question-option" value="${oIdx}" ${isSelected ? 'checked' : ''} onchange="selectAnswer(${idx}, ${oIdx})" class="mt-1 mr-3 text-blue-600 focus:ring-blue-500">
+                    <span class="text-sm leading-normal">${opt}</span>
+                `;
+                optionsContainer.appendChild(optDiv);
+            });
+
+            document.getElementById('btn-prev').disabled = idx === 0;
+            document.getElementById('btn-next').innerText = idx === questionBank.length - 1 ? "Review Terakhir" : "Selanjutnya";
+
+            updateGridStyles();
+        }
+
+        function selectAnswer(qIdx, optIdx) {
+            currentState.userAnswers[qIdx] = optIdx;
+            updateGridStyles();
+            checkCompletionStatus();
+        }
+
+        function navigateQuestion(direction) {
+            const newIdx = currentState.currentIndex + direction;
+            if (newIdx >= 0 && newIdx < questionBank.length) {
+                currentState.currentIndex = newIdx;
+                renderQuestion();
+            }
+        }
+
+        function goToQuestion(idx) {
+            currentState.currentIndex = idx;
+            renderQuestion();
+        }
+
+        function updateGridStyles() {
+            let answeredCount = 0;
+            questionBank.forEach((_, idx) => {
+                const btn = document.getElementById(`grid-btn-${idx}`);
+                const isAnswered = currentState.userAnswers[idx] !== null;
+                const isCurrent = idx === currentState.currentIndex;
+
+                if (isAnswered) answeredCount++;
+
+                let cssClass = "h-8 w-full rounded font-semibold text-xs border transition flex items-center justify-center ";
+                if (isCurrent) {
+                    cssClass += "ring-2 ring-blue-600 border-blue-600 bg-blue-50 text-blue-900 font-bold ";
+                } else if (isAnswered) {
+                    cssClass += "bg-emerald-600 text-white border-emerald-600 ";
+                } else {
+                    cssClass += "bg-white border-slate-300 text-slate-700 hover:bg-slate-100 ";
+                }
+                btn.className = cssClass;
+            });
+
+            document.getElementById('answered-counter').innerText = `${answeredCount}/${questionBank.length} Terjawab`;
+        }
+
+        function checkCompletionStatus() {
+            const allAnswered = currentState.userAnswers.every(ans => ans !== null);
+            const submitBtn = document.getElementById('btn-submit');
+
+            if (allAnswered) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('bg-slate-300', 'text-slate-500', 'cursor-not-allowed', 'shadow-inner');
+                submitBtn.classList.add('bg-emerald-600', 'hover:bg-emerald-700', 'text-white', 'shadow-md', 'cursor-pointer');
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('bg-slate-300', 'text-slate-500', 'cursor-not-allowed', 'shadow-inner');
+                submitBtn.classList.remove('bg-emerald-600', 'hover:bg-emerald-700', 'text-white', 'shadow-md', 'cursor-pointer');
+            }
+        }
+
+        function confirmSubmit() {
+            const allAnswered = currentState.userAnswers.every(ans => ans !== null);
+            if (!allAnswered) {
+                alert("Peringatan: Masih ada soal yang belum terjawab!");
+                return;
+            }
+
+            if (confirm("Apakah Anda yakin ingin mengakhiri dan mengumpulkan jawaban ujian ini?")) {
+                submitExam();
+            }
+        }
+
+        function submitExam() {
+            clearInterval(timerInterval);
+
+            let correctCount = 0;
+            questionBank.forEach((q, idx) => {
+                if (currentState.userAnswers[idx] === q.answer) {
+                    correctCount++;
+                }
+            });
+
+            const finalScore = Math.round((correctCount / questionBank.length) * 100);
+            const isPassed = finalScore >= 75;
+
+            document.getElementById('view-cbt').classList.add('hidden');
+            document.getElementById('view-result').classList.remove('hidden');
+
+            document.getElementById('res-nama').innerText = currentState.nama;
+            document.getElementById('res-reg').innerText = currentState.nomorReg;
+            document.getElementById('res-score').innerText = `${correctCount} dari ${questionBank.length} Soal (${finalScore} Poin)`;
+            
+            const statusEl = document.getElementById('res-status');
+            if (isPassed) {
+                statusEl.innerText = "LULUS (KOMPETEN)";
+                statusEl.className = "font-bold text-emerald-600";
+            } else {
+                statusEl.innerText = "BELUM LULUS (BELUM KOMPETEN)";
+                statusEl.className = "font-bold text-rose-600";
+            }
+        }
+    </script>
+</body>
+</html>
